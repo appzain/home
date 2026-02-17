@@ -13,7 +13,7 @@
         * { box-sizing: border-box; }
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
 
-        /* VARIABLES (Akan diupdate via JS dari Spreadsheet) */
+        /* VARIABLES */
         :root {
             --text-color: #ffffff;
             --border-color: #ffffff;
@@ -48,11 +48,24 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border-radius: 16px;
-            border: 1px solid var(--border-color); /* Menggunakan Variable */
+            border: 1px solid var(--border-color);
+            position: relative; /* Penting untuk glow */
         }
 
         .link-card { transition: transform 0.2s, background 0.2s; }
         .link-card:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.35); }
+
+        /* EFEK GLOW BERJALAN (BARU) */
+        @keyframes running-glow {
+            0% { box-shadow: 0 0 5px var(--border-color), inset 0 0 5px var(--border-color); }
+            50% { box-shadow: 0 0 20px var(--border-color), inset 0 0 10px var(--border-color); border-color: rgba(255,255,255,0.8); }
+            100% { box-shadow: 0 0 5px var(--border-color), inset 0 0 5px var(--border-color); }
+        }
+        
+        .glow-active {
+            animation: running-glow 2s infinite ease-in-out;
+            z-index: 1;
+        }
 
         /* PROFILE FRAME */
         .rainbow-frame {
@@ -66,25 +79,17 @@
             100% { background-position: 0 0; }
         }
 
-        /* ICONS */
+        /* ICONS & STATS */
         .brand-wa { color: #25D366; } .bg-icon-wa { background-color: #25D366; color: white; border: 1px solid #128C7E; }
         .brand-yt { color: #FF0000; } .bg-icon-yt { background-color: #FF0000; color: white; border: 1px solid #CC0000; }
         .brand-ig { color: #E1306C; } .bg-icon-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; border: 1px solid white; }
         .brand-tk { color: #000000; } .bg-icon-tk { background-color: #000000; color: white; border: 1px solid #333; }
         .bg-icon-def { background-color: rgba(255,255,255,0.2); color: white; }
 
-        /* TRAFFIC STATS CSS */
-        .stat-box {
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            padding: 8px;
-            text-align: center;
-            font-size: 10px;
-        }
+        .stat-box { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; text-align: center; font-size: 10px; }
         .stat-val { font-size: 14px; font-weight: bold; display: block; }
         .stat-label { opacity: 0.8; }
         
-        /* REFRESH BTN */
         .refresh-btn {
             position: absolute; top: 10px; right: 10px;
             background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
@@ -97,7 +102,6 @@
     <button onclick="forceReload()" class="refresh-btn"><i class="fas fa-sync-alt"></i></button>
 
     <div class="glass-card w-full max-w-md p-6 text-center relative mx-2">
-        <!-- HEADER / PROFIL -->
         <div class="mb-6">
             <div class="w-28 h-28 mx-auto mb-4 rainbow-frame">
                 <img src="https://ui-avatars.com/api/?name=Loading&background=0D8ABC&color=fff" 
@@ -111,33 +115,16 @@
             <div id="social-container" class="flex justify-center gap-5 mt-3 text-2xl min-h-[30px]"></div>
         </div>
 
-        <!-- LIST TOMBOL -->
         <div id="links-container" class="space-y-4 text-left"></div>
 
-        <!-- TRAFFIC STATS -->
         <div class="mt-8 pt-6 border-t border-white/20">
             <p class="text-xs mb-3 font-semibold opacity-70"><i class="fas fa-chart-bar mr-1"></i> Statistik Pengunjung</p>
             <div class="grid grid-cols-5 gap-2">
-                <div class="stat-box">
-                    <span class="stat-val" id="count-today">-</span>
-                    <span class="stat-label">Hari Ini</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-val" id="count-week">-</span>
-                    <span class="stat-label">Minggu</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-val" id="count-month">-</span>
-                    <span class="stat-label">Bulan</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-val" id="count-year">-</span>
-                    <span class="stat-label">Tahun</span>
-                </div>
-                <div class="stat-box bg-white/10">
-                    <span class="stat-val" id="count-total">-</span>
-                    <span class="stat-label">Total</span>
-                </div>
+                <div class="stat-box"><span class="stat-val" id="count-today">-</span><span class="stat-label">Hari Ini</span></div>
+                <div class="stat-box"><span class="stat-val" id="count-week">-</span><span class="stat-label">Minggu</span></div>
+                <div class="stat-box"><span class="stat-val" id="count-month">-</span><span class="stat-label">Bulan</span></div>
+                <div class="stat-box"><span class="stat-val" id="count-year">-</span><span class="stat-label">Tahun</span></div>
+                <div class="stat-box bg-white/10"><span class="stat-val" id="count-total">-</span><span class="stat-label">Total</span></div>
             </div>
         </div>
         
@@ -146,27 +133,14 @@
         </div>
     </div>
 
-    <!-- STATUS DEBUG -->
-    <div class="mt-4 text-[10px] opacity-60 text-center px-4">
-        <span id="status-text">Menunggu data...</span>
-    </div>
+    <div class="mt-4 text-[10px] opacity-60 text-center px-4"><span id="status-text">Menunggu data...</span></div>
 
     <script>
-        // =========================================================================
-        // BAGIAN 1: KONFIGURASI LINK
-        // =========================================================================
-        
-        // 1. Link CSV Publik Spreadsheet (Untuk Data Tampilan)
+        // === LINK KONFIGURASI ===
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRiF-uBUc04MXf4kWGKZXAkXH4zgqH-s4HX3hXzLO6rFNkHAgJ0PBvzeAcoSew_1whl07xWKcdchv/pub?output=csv";
-
-        // 2. Link Web App Apps Script (Untuk Counter Traffic) - ISI INI SETELAH DEPLOY
         const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbg1r05OEYOZYMNyW0vPPDUiN79ARK8y4MkIcmjASAOaxoe2zw3YUwozLjamXgrFLZ8Q/exec"; 
-        // Contoh: "https://script.google.com/macros/s/AKfycby.../exec"
-        // Biarkan kosong "" jika belum deploy, statistik akan tampil tanda strip (-).
 
-        // =========================================================================
-        // LOGIC SCRIPT
-        // =========================================================================
+        // === LOGIC ===
         const els = {
             name: document.getElementById('profile-name'),
             bio: document.getElementById('profile-bio'),
@@ -174,13 +148,7 @@
             social: document.getElementById('social-container'),
             links: document.getElementById('links-container'),
             status: document.getElementById('status-text'),
-            stats: {
-                today: document.getElementById('count-today'),
-                week: document.getElementById('count-week'),
-                month: document.getElementById('count-month'),
-                year: document.getElementById('count-year'),
-                total: document.getElementById('count-total')
-            }
+            stats: { today: document.getElementById('count-today'), week: document.getElementById('count-week'), month: document.getElementById('count-month'), year: document.getElementById('count-year'), total: document.getElementById('count-total') }
         };
 
         function forceReload() {
@@ -190,11 +158,9 @@
         }
 
         function init() {
-            // 1. Ambil Data Tampilan (CSV)
             const uniqueUrl = CSV_URL + "&t=" + new Date().getTime();
             Papa.parse(uniqueUrl, {
-                download: true,
-                header: false,
+                download: true, header: false,
                 complete: (res) => {
                     els.status.innerText = "Tampilan dimuat.";
                     els.name.classList.remove('animate-pulse');
@@ -203,22 +169,12 @@
                 error: () => els.status.innerText = "Gagal memuat CSV."
             });
 
-            // 2. Hitung Traffic (Panggil Web App)
             if (APP_SCRIPT_URL) {
-                fetch(APP_SCRIPT_URL)
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.status === 'success') {
-                            els.stats.today.innerText = data.today;
-                            els.stats.week.innerText = data.week;
-                            els.stats.month.innerText = data.month;
-                            els.stats.year.innerText = data.year;
-                            els.stats.total.innerText = data.total;
-                        }
-                    })
-                    .catch(err => console.log("Traffic Error:", err));
-            } else {
-                els.status.innerText += " (Counter belum disetting)";
+                fetch(APP_SCRIPT_URL).then(r => r.json()).then(d => {
+                    if(d.status === 'success') {
+                        els.stats.today.innerText = d.today; els.stats.week.innerText = d.week; els.stats.month.innerText = d.month; els.stats.year.innerText = d.year; els.stats.total.innerText = d.total;
+                    }
+                }).catch(e => console.log("Traffic err", e));
             }
         }
 
@@ -226,58 +182,51 @@
             els.social.innerHTML = '';
             els.links.innerHTML = '';
             
-            // Variabel CSS Default
             let textColor = '#ffffff';
             let borderColor = '#ffffff';
             let fontFamily = "'Segoe UI', sans-serif";
+            let glowEffect = false; // Flag untuk efek glow
 
             for (let i = 1; i < data.length; i++) {
                 const row = data[i];
                 const key = (row[0] || "").trim();
                 const val = (row[1] || "").trim();
-                const img = (row[2] || "").trim(); // Col C untuk gambar/icon/setting
+                const img = (row[2] || "").trim();
 
                 if (!key) continue;
-
                 const keyUpper = key.toUpperCase();
 
-                // --- BAGIAN SETTING TAMPILAN ---
-                if (keyUpper === 'SETTING: NAMA') {
-                    if(val && val !== '-') els.name.innerText = val;
-                } else if (keyUpper === 'SETTING: BIO') {
-                    if(val && val !== '-') els.bio.innerText = val;
-                } else if (keyUpper === 'SETTING: FOTO') {
-                    if(val.startsWith('http')) els.img.src = val;
-                } 
-                // Setting Style Baru
-                else if (keyUpper === 'SETTING: WARNA TEXT') {
-                    if(val && val.startsWith('#')) textColor = val;
-                } else if (keyUpper === 'SETTING: WARNA BORDER') {
-                    if(val && val.startsWith('#')) borderColor = val;
-                } else if (keyUpper === 'SETTING: FONT') {
-                    if(val && val !== '-') fontFamily = val + ", sans-serif";
+                // SETTINGS
+                if (keyUpper === 'SETTING: NAMA') { if(val && val !== '-') els.name.innerText = val; } 
+                else if (keyUpper === 'SETTING: BIO') { if(val && val !== '-') els.bio.innerText = val; } 
+                else if (keyUpper === 'SETTING: FOTO') { if(val.startsWith('http')) els.img.src = val; }
+                else if (keyUpper === 'SETTING: WARNA TEXT') { if(val.startsWith('#')) textColor = val; }
+                else if (keyUpper === 'SETTING: WARNA BORDER') { if(val.startsWith('#')) borderColor = val; }
+                else if (keyUpper === 'SETTING: FONT') { if(val !== '-') fontFamily = val + ", sans-serif"; }
+                // CEK SETTING GLOW (BARU)
+                else if (keyUpper === 'SETTING: EFEK GLOW') { 
+                    if(val.toUpperCase() === 'YA' || val.toUpperCase() === 'YES') glowEffect = true; 
                 }
 
-                // --- BAGIAN SOSMED KECIL ---
+                // SOSMED
                 else if (keyUpper.startsWith('SOSMED:')) {
                     if (val && val !== '-' && img && img !== '-') {
                         let colorClass = 'hover:text-gray-200 transition';
-                        const checkStr = (img + val).toLowerCase();
-                        if(checkStr.includes('whatsapp')) colorClass = 'brand-wa';
-                        else if(checkStr.includes('youtube')) colorClass = 'brand-yt';
-                        else if(checkStr.includes('instagram')) colorClass = 'brand-ig';
-                        else if(checkStr.includes('tiktok')) colorClass = 'brand-tk';
+                        const check = (img + val).toLowerCase();
+                        if(check.includes('whatsapp')) colorClass = 'brand-wa';
+                        else if(check.includes('youtube')) colorClass = 'brand-yt';
+                        else if(check.includes('instagram')) colorClass = 'brand-ig';
+                        else if(check.includes('tiktok')) colorClass = 'brand-tk';
                         els.social.innerHTML += `<a href="${val}" target="_blank" class="${colorClass} hover:opacity-80 transition" style="color:${textColor}"><i class="${img}"></i></a>`;
                     }
                 }
-                // --- BAGIAN TOMBOL ---
+                // TOMBOL
                 else if (!key.includes('---') && !keyUpper.startsWith('SETTING')) {
                     if (!val || val === '-') continue;
 
                     let iconHtml = '';
                     let iconBgClass = 'bg-icon-def';
                     const iconLower = (img + " " + key).toLowerCase();
-
                     if (iconLower.includes('whatsapp') || iconLower.includes('wa')) iconBgClass = 'bg-icon-wa';
                     else if (iconLower.includes('youtube')) iconBgClass = 'bg-icon-yt';
                     else if (iconLower.includes('instagram') || iconLower.includes('ig')) iconBgClass = 'bg-icon-ig';
@@ -292,24 +241,22 @@
                         iconHtml = `<div class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-full mr-4 text-xl"><i class="fas fa-link"></i></div>`;
                     }
 
-                    // Render Tombol dengan Style Custom
+                    // Tambahkan Class Glow jika aktif
+                    const activeGlowClass = glowEffect ? 'glow-active' : '';
+
                     els.links.innerHTML += `
                         <a href="${val}" target="_blank" class="block">
-                            <div class="glass-card link-card p-3 flex items-center justify-between text-left hover:text-white" style="border-color: ${borderColor}; color: ${textColor}">
+                            <div class="glass-card link-card p-3 flex items-center justify-between text-left hover:text-white ${activeGlowClass}" style="border-color: ${borderColor}; color: ${textColor}">
                                 <div class="flex items-center w-full min-w-0">
                                     <div class="flex-shrink-0">${iconHtml}</div>
                                     <span class="font-semibold text-lg truncate pr-2">${key}</span>
                                 </div>
-                                <div class="opacity-70 flex-shrink-0">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
+                                <div class="opacity-70 flex-shrink-0"><i class="fas fa-chevron-right"></i></div>
                             </div>
                         </a>
                     `;
                 }
             }
-
-            // Terapkan Style ke Variable CSS Root
             document.documentElement.style.setProperty('--text-color', textColor);
             document.documentElement.style.setProperty('--border-color', borderColor);
             document.documentElement.style.setProperty('--bg-font', fontFamily);
