@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsite Profil Saya</title>
+    <!-- Tailwind CSS untuk styling cepat -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse untuk membaca data Google Sheet (CSV) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- Font Awesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* RESET TOTAL: Menghilangkan semua margin/padding bawaan browser */
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden; /* Mencegah scroll ke samping */
+        }
+
+        /* Custom Scrollbar (Opsional - agar lebih tipis) */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3); 
+            border-radius: 10px;
+        }
+
+        /* Animasi Gradient Background Utama */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            /* Pastikan background fix memenuhi layar */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Glassmorphism Effect untuk Kartu */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .link-card {
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .link-card:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* FRAME WARNA WARNI (Gradient Border) */
+        .rainbow-frame {
+            position: relative;
+            z-index: 0;
+            border-radius: 50%;
+            padding: 4px; 
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            animation: glowing 20s linear infinite;
+        }
+        
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* Styling Khusus Brand Colors untuk Icon */
+        .brand-icon-wa {
+            background-color: #25D366 !important;
+            color: white !important;
+            border: 2px solid #128C7E;
+        }
+        .brand-icon-yt {
+            background-color: #FF0000 !important;
+            color: white !important;
+            border: 2px solid #CC0000;
+        }
+        .brand-icon-ig {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%) !important;
+            color: white !important;
+            border: 2px solid #fff;
+        }
+        .brand-icon-tiktok {
+            background-color: #000000 !important;
+            color: white !important;
+            border: 2px solid #333;
+        }
+        .brand-icon-default {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+    </style>
+</head>
+<!-- HAPUS p-4 dan ubah justify-center jadi justify-start agar mulai dari atas -->
+<body class="min-h-screen flex flex-col items-center justify-start py-8 px-2">
+
+    <!-- Container Utama: 
+         w-full + max-w-md untuk membatasi lebar di PC agar tetap rapi seperti HP -->
+    <div class="glass-card w-full max-w-md p-6 text-center text-white relative">
+        
+        <!-- Bagian Profil -->
+        <div class="mb-6">
+            <div class="w-28 h-28 mx-auto mb-4 rainbow-frame">
+                <img src="https://ui-avatars.com/api/?name=User+Profile&background=0D8ABC&color=fff&size=128" 
+                     alt="Profile Picture" 
+                     id="profile-image"
+                     class="rounded-full w-full h-full object-cover border-2 border-white bg-white">
+            </div>
+            
+            <h1 id="profile-name" class="text-2xl font-bold drop-shadow-md">Nama Profil Anda</h1>
+            <p id="profile-bio" class="text-sm opacity-90 mt-1">Deskripsi singkat atau bio ada di sini.</p>
+            
+            <!-- Social Media Icons -->
+            <div class="flex justify-center gap-4 mt-4 text-xl">
+                <a href="#" class="hover:text-pink-300 transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-gray-300 transition"><i class="fab fa-tiktok"></i></a>
+                <a href="#" class="hover:text-green-300 transition"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+
+        <!-- Container Tombol Link (Dinamis dari Sheet) -->
+        <div id="links-container" class="space-y-4">
+            <div class="loader" id="loader"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-xs opacity-70">
+            <p>&copy; 2024 Dibuat dengan Google Sheets</p>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // KONFIGURASI DATABASE (GOOGLE SHEETS)
+        // =========================================================================
+        
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMRiF-uBUc04MXf4kWGKZXAkXH4zgqH-s4HX3hXzLO6rFNkHAgJ0PBvzeAcoSew_1whl07xWKcdchv/pub?output=csv"; 
+
+        // =========================================================================
+        // LOGIC SCRIPT
+        // =========================================================================
+
+        const linksContainer = document.getElementById('links-container');
+        const loader = document.getElementById('loader');
+
+        function initMicrosite() {
+            fetchDataFromSheet();
+        }
+
+        function fetchDataFromSheet() {
+            Papa.parse(GOOGLE_SHEET_CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    renderLinks(results.data);
+                },
+                error: function(err) {
+                    console.error("Error:", err);
+                    linksContainer.innerHTML = `<p class="text-red-200 bg-red-800/50 p-2 rounded">Gagal memuat data. Cek Link CSV.</p>`;
+                    loader.style.display = 'none';
+                }
+            });
+        }
+
+        function renderLinks(data) {
+            loader.style.display = 'none';
+            linksContainer.innerHTML = ''; 
+
+            data.forEach(item => {
+                if(!item.Judul || !item.Link) return;
+
+                let iconOrImage = '';
+                let customClass = 'brand-icon-default';
+
+                const iconStr = (item.Gambar || "").toLowerCase();
+                
+                if (iconStr.includes('whatsapp')) {
+                    customClass = 'brand-icon-wa';
+                } else if (iconStr.includes('youtube')) {
+                    customClass = 'brand-icon-yt';
+                } else if (iconStr.includes('instagram')) {
+                    customClass = 'brand-icon-ig';
+                } else if (iconStr.includes('tiktok')) {
+                    customClass = 'brand-icon-tiktok';
+                }
+
+                const isUrl = iconStr.includes('http') || iconStr.includes('data:image');
+                
+                if (isUrl) {
+                    iconOrImage = `<img src="${item.Gambar}" class="w-10 h-10 rounded-full object-cover mr-4 border-2 border-white/50" alt="Icon">`;
+                } else if (item.Gambar) {
+                    iconOrImage = `<div class="w-10 h-10 flex items-center justify-center rounded-full mr-4 text-xl shadow-md ${customClass}"><i class="${item.Gambar}"></i></div>`;
+                } else {
+                    iconOrImage = `<div class="w-10 h-10 flex items-center justify-center bg-white/20 rounded-full mr-4 text-xl"><i class="fas fa-link"></i></div>`;
+                }
+
+                const cardHtml = `
+                    <a href="${item.Link}" target="_blank" class="block">
+                        <div class="glass-card link-card p-3 flex items-center justify-between text-left text-white hover:text-white">
+                            <div class="flex items-center w-full">
+                                ${iconOrImage}
+                                <span class="font-semibold text-lg truncate">${item.Judul}</span>
+                            </div>
+                            <div class="opacity-70">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                
+                linksContainer.innerHTML += cardHtml;
+            });
+        }
+
+        initMicrosite();
+
+    </script>
+</body>
+</html>
