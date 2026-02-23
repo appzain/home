@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Microsite Profil</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R0D7MGCLZM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-R0D7MGCLZM');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -122,15 +133,6 @@
         .brand-tk { color: #000000; } .bg-icon-tk { background-color: #000000; color: white; border: 1px solid #333; }
         .bg-icon-def { background-color: rgba(255,255,255,0.2); color: white; }
 
-        .stat-box { 
-            background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 12px; padding: 10px 4px; text-align: center; font-size: 10px;
-            backdrop-filter: blur(4px); transition: transform 0.2s;
-        }
-        .stat-box:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.25); }
-        .stat-val { font-size: 16px; font-weight: bold; display: block; margin-bottom: 2px; }
-        .stat-label { opacity: 0.9; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
         .refresh-btn {
             position: absolute; top: 10px; right: 10px;
             background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);
@@ -161,17 +163,6 @@
             </div>
 
             <div id="links-container" class="space-y-4 text-left"></div>
-
-            <div class="mt-8 pt-6 border-t border-white/20">
-                <p class="text-xs mb-4 font-semibold opacity-80 uppercase tracking-widest"><i class="fas fa-chart-line mr-1"></i> Statistik Pengunjung</p>
-                <div class="grid grid-cols-5 gap-2">
-                    <div class="stat-box"><span class="stat-val" id="count-today">-</span><span class="stat-label">Hari Ini</span></div>
-                    <div class="stat-box"><span class="stat-val" id="count-week">-</span><span class="stat-label">Minggu</span></div>
-                    <div class="stat-box"><span class="stat-val" id="count-month">-</span><span class="stat-label">Bulan</span></div>
-                    <div class="stat-box"><span class="stat-val" id="count-year">-</span><span class="stat-label">Tahun</span></div>
-                    <div class="stat-box bg-white/20 border-white/40"><span class="stat-val" id="count-total">-</span><span class="stat-label">Total</span></div>
-                </div>
-            </div>
             
             <div class="mt-8 text-xs opacity-50 text-center">
                 <p>&copy; 2026 Edited By Zain</p>
@@ -185,7 +176,6 @@
     <script>
         // === LINK KONFIGURASI ===
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXmNUdxUNi1VINXverNm6Jf1xnu5KxAu7meNYyPzmeatf7d5d2noQF_kqoagM-0ieSxgMwEr_v_dHE/pub?output=csv";
-        const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyj4r9DDrqfBPur6A2QxOU6KFDjmtKge1bN95tIkVbWbX6b8N4mo0rjyknrnaolRiGf/exec"; 
 
         // === LOGIC ===
         const els = {
@@ -194,8 +184,7 @@
             img: document.getElementById('profile-image'),
             social: document.getElementById('social-container'),
             links: document.getElementById('links-container'),
-            status: document.getElementById('status-text'),
-            stats: { today: document.getElementById('count-today'), week: document.getElementById('count-week'), month: document.getElementById('count-month'), year: document.getElementById('count-year'), total: document.getElementById('count-total') }
+            status: document.getElementById('status-text')
         };
 
         function forceReload() {
@@ -215,28 +204,6 @@
                 },
                 error: () => els.status.innerText = "Gagal memuat CSV."
             });
-
-            if (APP_SCRIPT_URL) {
-                const statsUrl = APP_SCRIPT_URL + "?t=" + new Date().getTime();
-                fetch(statsUrl, { redirect: 'follow' })
-                    .then(r => r.json())
-                    .then(d => {
-                        if(d.status === 'success') {
-                            els.stats.today.innerText = d.today; 
-                            els.stats.week.innerText = d.week; 
-                            els.stats.month.innerText = d.month; 
-                            els.stats.year.innerText = d.year; 
-                            els.stats.total.innerText = d.total;
-                            els.status.innerText += " Statistik aktif.";
-                        } else {
-                            els.status.innerText += " Error data statistik.";
-                        }
-                    })
-                    .catch(e => {
-                        console.log("Traffic err", e);
-                        els.status.innerText += " Gagal koneksi statistik.";
-                    });
-            }
         }
 
         function renderAll(data) {
